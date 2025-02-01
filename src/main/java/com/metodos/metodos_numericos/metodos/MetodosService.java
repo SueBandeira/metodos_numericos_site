@@ -16,6 +16,33 @@ public class MetodosService { // todo adicionar os métodos e condições devida
 
   }
 
+  /*
+  ⌈============================⌉
+        DADOS DE ENTRADA:
+  —————————————————————————————
+  Matriz A = [1,3;4,9]
+  Matriz b = [3;4]
+  —————————————————————————————
+  Matriz expandida: Matriz 1
+ ⌈============================⌉
+        1ª Iteração
+ ⌊============================⌋
+
+   L2 ⇐ L2 - L1 × (a21/a11)
+
+ Matriz 2
+
+m1:
+1 3 | 3
+4 9 | 4
+m2:
+1 3  |  3
+0 -3 | -8
+s:
+-5.0000
+2.6667
+ */
+
   public double sum(double num1, double num2) {
     return num1 + num2;
   } // método de exemplo para teste de endpoint
@@ -91,4 +118,56 @@ public class MetodosService { // todo adicionar os métodos e condições devida
     }
     return b;
   }
+
+  public double[] calcularEliminacaoGaussiana(double[][] a, double[] b) {
+    int n = a.length;
+
+    // Criando a matriz aumentada [A|B]
+    double[][] matrixAumentada = new double[n][n + 1];
+    for (int i = 0; i < n; i++) {
+      System.arraycopy(a[i], 0, matrixAumentada[i], 0, n);
+      matrixAumentada[i][n] = b[i]; // Adiciona a coluna de termos independentes
+    }
+
+    // Transformação para a forma triangular superior
+    for (int k = 0; k < n; k++) {
+      // Pivoteamento parcial
+      int maxRow = k;
+      for (int i = k + 1; i < n; i++) {
+        if (Math.abs(matrixAumentada[i][k]) > Math.abs(matrixAumentada[maxRow][k])) {
+          maxRow = i;
+        }
+      }
+      // Troca de linhas se necessário
+      double[] temp = matrixAumentada[k];
+      matrixAumentada[k] = matrixAumentada[maxRow];
+      matrixAumentada[maxRow] = temp;
+
+      // Verifica se o sistema tem solução única
+      if (matrixAumentada[k][k] == 0) {
+        throw new IllegalArgumentException("O sistema não tem solução única.");
+      }
+
+      // Eliminação
+      for (int i = k + 1; i < n; i++) {
+        double fator = matrixAumentada[i][k] / matrixAumentada[k][k];
+        for (int j = k; j <= n; j++) { // Vai até n para incluir a coluna de termos independentes
+          matrixAumentada[i][j] -= fator * matrixAumentada[k][j];
+        }
+      }
+    }
+
+    // Resolução por substituição regressiva
+    double[] x = new double[n];
+    for (int i = n - 1; i >= 0; i--) {
+      x[i] = matrixAumentada[i][n];
+      for (int j = i + 1; j < n; j++) {
+        x[i] -= matrixAumentada[i][j] * x[j];
+      }
+      x[i] /= matrixAumentada[i][i];
+    }
+
+    return x;
+  }
+
 }
